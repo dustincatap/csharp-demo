@@ -20,7 +20,7 @@ class Program
                 Console.WriteLine($"An error occurred: {exception.Message}");
                 break;
 
-            case Failure<IEnumerable<User>> { Exception: Exception exception }:
+            case Failure<IEnumerable<User>> { Exception: UserNotFoundException exception } when exception.ErrorCode == "USER_NOT_FOUND":
                 Console.WriteLine($"An error occurred: {exception.Message}");
                 break;
         }
