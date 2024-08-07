@@ -1,4 +1,6 @@
-﻿using Erni.University.Models;
+﻿using Erni.University.Exceptions;
+using Erni.University.Models;
+using Erni.University.Repositories;
 using Erni.University.Services;
 
 namespace Erni.University;
@@ -7,7 +9,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        var userService = new UserService();
+        var userService = new UserService(new UserRepository());
         var getUserResult = userService.GetUsers();
 
         switch (getUserResult)
@@ -28,7 +30,7 @@ class Program
 
     static void Bar()
     {
-        var userService = new UserService();
+        var userService = new UserService(new UserRepository());
         var getUserResult = userService.GetUser("charlie@test.com");
 
 
