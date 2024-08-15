@@ -2,6 +2,7 @@
 using Erni.University.Models;
 using Erni.University.Repositories;
 using Erni.University.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Erni.University;
 
@@ -9,45 +10,27 @@ class Program
 {
     static void Main(string[] args)
     {
-        var userService = new UserService(new UserRepository());
+        var programLogger = LoggerProvider.CreateLogger<Program>();
+        var userServiceLogger = LoggerProvider.CreateLogger<UserService>();
+        var userService = new UserService(new UserRepository(), userServiceLogger);
         var getUserResult = userService.GetUsers();
 
         switch (getUserResult)
         {
             case Success<IEnumerable<User>> { Value: var users }:
-                users.ToList().ForEach(Console.WriteLine);
+                users.ToList().ForEach(u => programLogger.LogInformation("User: {user}", u));
                 break;
 
             case Failure<IEnumerable<User>> { Exception: NoUsersFoundException exception }:
-                Console.WriteLine($"An error occurred: {exception.Message}");
+                programLogger.LogError(exception, "An error occurred: {message}", exception.Message);
                 break;
 
-            case Failure<IEnumerable<User>> { Exception: UserNotFoundException exception } when exception.ErrorCode == "USER_NOT_FOUND":
-                Console.WriteLine($"An error occurred: {exception.Message}");
+            case Failure<IEnumerable<User>>
+            {
+                Exception: UserNotFoundException { ErrorCode: "USER_NOT_FOUND" } exception
+            }:
+                programLogger.LogWarning(exception, "An error occurred: {message}", exception.Message);
                 break;
         }
-    }
-
-    static void Bar()
-    {
-        var userService = new UserService(new UserRepository());
-        var getUserResult = userService.GetUser("charlie@test.com");
-
-
-        if (getUserResult is not Success<User> { Value: var user })
-        {
-            return;
-        }
-
-        Console.WriteLine(user);
-
-        var getUsersResult = userService.GetUsers();
-
-        if (getUsersResult is not Success<IEnumerable<User>> { Value: var users })
-        {
-            return;
-        }
-
-        users.ToList().ForEach(Console.WriteLine);
     }
 }

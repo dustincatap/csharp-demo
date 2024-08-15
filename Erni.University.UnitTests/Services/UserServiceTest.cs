@@ -2,6 +2,7 @@ using Erni.University.Exceptions;
 using Erni.University.Models;
 using Erni.University.Repositories;
 using Erni.University.Services;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
@@ -39,7 +40,7 @@ public class UserServiceTest
 
     private UserService CreateUnitUnderTest()
     {
-        return new UserService(_userRepositoryMock.Object);
+        return new UserService(_userRepositoryMock.Object, Mock.Of<ILogger<UserService>>());
     }
 
     [Test]
@@ -102,10 +103,7 @@ public class UserServiceTest
     {
         var unitUnderTest = CreateUnitUnderTest();
         _userRepositoryMock.Setup(x => x.GetAll()).Returns([])
-            .Callback(() =>
-            {
-                Console.WriteLine("GetAll was called");
-            });
+            .Callback(() => { Console.WriteLine("GetAll was called"); });
 
         var actualResult = unitUnderTest.GetUser("john@email.com");
         var actualException = (actualResult as Failure<User>)?.Exception;
